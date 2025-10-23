@@ -1,0 +1,197 @@
+%plot(value(var_wind.wind_elec));
+%plot(value(var_sofc.sofc_operational_state));
+%plot(wind);
+%plot(solar);
+%showprob(optimproblem_object);
+%data = [var_util.import var_legacy_diesel.electricity var_pv.pv_elec var_ees.ees_dchrg var_lees.ees_dchrg var_rees.rees_dchrg var_ldg.ldg_elec var_legacy_diesel_binary.electricity var_lbot.lbot_elec var_run_of_river.electricity var_pem.elec var_ror_integer.elec var_wave.electricity var_sofc.sofc_electricity]
+%hold
+%area(data)
+%legend('import', 'diesel', 'pv', 'ees', 'lees', 'rees', 'ldg', 'legacy diesel', 'lbot', 'ror', 'pem', 'ror_int', 'wave', 'sofc');
+
+
+%plot(value(var_pem.elec));
+%plot(value(var_sofc.sofc_operational_state));
+%plot(value(var_pv.pv_elec));
+
+% params.IISMethod = 1;   % Fast method (not guaranteed minimal, but usually enough)
+% params.Presolve  = 0;   % Turn off presolve to avoid masking infeasibility
+% iis = gurobi_iis(model, params);
+
+% row = 8761;
+% 
+% % Extract coefficients for this row
+% coeffs = find(model.A(row, :));
+% 
+% fprintf('Constraint %d: ', row);
+% for j = coeffs
+%     coef = full(model.A(row, j));
+%     if isfield(model, 'varnames')
+%         vname = model.varnames{j};
+%     else
+%         vname = sprintf('x%d', j);  % fallback name
+%     end
+%     fprintf('%+g*%s ', coef, vname);
+% end
+% 
+% fprintf(' %s %g\n', model.sense(row), model.rhs(row));
+
+% % penalties struct: all ones by default
+% penalties.lb  = ones(size(model.lb));
+% penalties.ub  = ones(size(model.ub));
+% penalties.rhs = ones(size(model.rhs));
+% 
+% % Build feasibility relaxation model
+% feasmodel = gurobi_feasrelax(model, 0, true, penalties);
+% 
+% % Solve
+% result = gurobi(feasmodel);
+% 
+% n = length(model.obj);   % original vars
+% m = length(model.rhs);   % constraints
+% 
+% slacks = result.x(n+1 : n+m);
+% 
+% viol_idx = find(slacks > 1e-6);
+% 
+% for k = viol_idx'
+%     cname = '';
+%     if isfield(model, 'constrnames')
+%         cname = model.constrnames{k};
+%     end
+%     fprintf('Constraint %d (%s) violated by %g\n', k, cname, slacks(k));
+% end
+
+% % 1) required fields
+% req = {'A','obj','rhs','sense'};
+% for k = 1:numel(req)
+%     if ~isfield(model, req{k})
+%         fprintf('Missing field: %s\n', req{k});
+%     end
+% end
+% 
+% % 2) sizes
+% if isfield(model,'A')
+%     [m,n] = size(model.A);
+%     fprintf('A is %d x %d\n', m, n);
+%     if length(model.obj) ~= n, fprintf('obj length mismatch: %d vs %d\n', length(model.obj), n); end
+%     if length(model.rhs) ~= m, fprintf('rhs length mismatch: %d vs %d\n', length(model.rhs), m); end
+%     if length(model.sense) ~= m, fprintf('sense length mismatch: %d vs %d\n', length(model.sense), m); end
+% else
+%     error('model.A missing — cannot proceed');
+% end
+% 
+% % 3) ensure lb/ub exist
+% if ~isfield(model,'lb'); model.lb = -inf(n,1); fprintf('Created default lb\n'); end
+% if ~isfield(model,'ub'); model.ub =  inf(n,1); fprintf('Created default ub\n'); end
+% if ~isfield(model,'varnames')
+%     model.varnames = arrayfun(@(i) sprintf('x%d',i), 1:n, 'uni', false);
+% end
+% if ~isfield(model,'constrnames')
+%     model.constrnames = arrayfun(@(i) sprintf('c%d',i), 1:m, 'uni', false);
+% end
+% 
+% [m,n] = size(model.A);
+% penalties.lb  = ones(n,1);
+% penalties.ub  = ones(n,1);
+% penalties.rhs = ones(m,1);
+% 
+% feasmodel = gurobi_feasrelax(model, 0, true, penalties);  % relaxobjtype=0, minrelax=true
+% % verify
+% disp('feasmodel fields:'); disp(fieldnames(feasmodel));
+% if ~isfield(feasmodel,'A'), error('feasmodel missing A — something went wrong with gurobi_feasrelax'); end
+% 
+% result = gurobi(feasmodel);
+% disp(fieldnames(result))
+
+% ---------- defensive wrapper for feasrelax ----------
+% assume 'model' is your original model
+% penalties.lb  = ones(length(model.lb),1);
+% penalties.ub  = ones(length(model.ub),1);
+% penalties.rhs = ones(length(model.rhs),1);
+% 
+% feasstruct = gurobi_feasrelax(model, 0, true, penalties);
+% 
+% % Get the actual model (handle both return styles)
+% if isfield(feasstruct,'model')
+%     actual_feas_model = feasstruct.model;
+% else
+%     actual_feas_model = feasstruct;
+% end
+% 
+% % Solve the feasibility-relaxed model (give a time limit if needed)
+% params.OutputFlag = 1;
+% params.TimeLimit = 600;    % optional: 10 minutes
+% result = gurobi(actual_feas_model, params);
+% 
+% % sanity
+% if ~isfield(result,'x')
+%     error('Solver did not return a solution vector (result.x). Check result fields:'); 
+% end
+% 
+% % ---------- find slack variables ----------
+% n_orig = length(model.obj);            % original # vars
+% n_feas = length(actual_feas_model.obj);% vars after relaxation
+% n_slacks = n_feas - n_orig;
+% fprintf('Original vars = %d, Feas vars = %d, Slack vars = %d\n', n_orig, n_feas, n_slacks);
+% 
+% if n_slacks <= 0
+%     warning('No slack variables detected (n_slacks <= 0). The feasrelax output structure may use a different mapping.');
+% end
+% 
+% slack_vals = result.x(n_orig+1 : n_feas);   % slack values
+% [vals, order] = sort(slack_vals, 'descend');
+% 
+% % print top slacks
+% topK = min(50, numel(vals));
+% fprintf('Top slack variables (desc):\n');
+% count = 0;
+% for k = 1:topK
+%     if vals(k) > 1e-8
+%         idx = n_orig + order(k);
+%         name = '';
+%         if isfield(actual_feas_model,'varnames')
+%             name = actual_feas_model.varnames{idx};
+%         else
+%             name = sprintf('slack_var_%d', idx);
+%         end
+%         fprintf('%2d) %s  = %g\n', k, name, vals(k));
+%         count = count + 1;
+%     end
+% end
+% if count==0, fprintf('No nonzero slacks (within tolerance). Model may be feasible or solver returned small values.\n'); end
+% 
+% % ---------- map slack variable names to original constraints ----------
+% % If the slack varnames encode the constraint index (common), we can parse them.
+% % Otherwise we fall back to inspecting slack varname & inspect the corresponding constraint(s).
+% 
+% fprintf('\nDetailed constraint forms for top slacks (if parseable):\n');
+% for k = 1:topK
+%     if vals(k) <= 1e-8, break; end
+%     slackIdx = n_orig + order(k);
+%     sname = '(unknown)';
+%     if isfield(actual_feas_model,'varnames'), sname = actual_feas_model.varnames{slackIdx}; end
+%     fprintf('\nSlack var: %s  value=%g\n', sname, vals(k));
+% 
+%     % Try to extract a constraint index from the slack name (common patterns)
+%     % Examples: 's_rhs_123', 'rhs_slack_123', 's_pos_45', 's_neg_45'
+%     tokens = regexp(sname, '(\d+)$', 'tokens');
+%     if ~isempty(tokens)
+%         row = str2double(tokens{1}{1});
+%         fprintf(' -> guessed constraint index = %d (inspect below)\n', row);
+% 
+%         % reconstruct algebraic form of the original constraint row
+%         [rows, cols, coefs] = find(model.A(row,:));
+%         if isempty(cols)
+%             fprintf('   (constraint row has no nonzeros?) sense=%s, rhs=%g\n', model.sense(row), model.rhs(row));
+%         else
+%             fprintf('   ');
+%             for t = 1:length(cols)
+%                 vname = model.varnames{cols(t)};
+%                 fprintf('%g*%s  +  ', full(coefs(t)), vname);
+%             end
+%             fprintf(' %s %g\n', model.sense(row), model.rhs(row));
+%         end
+%     else
+%         fprintf('   Slack name does not contain trailing digits; cannot auto-map. You can inspect the slack var index %d manually.\n', slackIdx);
+%     end
+% end

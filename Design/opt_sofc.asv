@@ -1,0 +1,70 @@
+if sofc_on
+Constraints = [Constraints
+0 <= var_sofc.adopted_sofc
+0 <= var_sofc.sofc_operational_state
+0 <= var_sofc.sofc_electricity
+var_sofc.sofc_operational_state <= var_sofc.adopted_sofc];
+%%%
+    step = floor(length(elec)/length(var_sofc.sofc_operational_state));
+    extra = mod(length(elec),length(var_sofc.sofc_operational_state));
+    for ii = 1:length(var_sofc.sofc_operational_state)
+        idx_start = 1+(ii-1)*step;
+        idx_finish = ii*step;
+
+        if idx_finish >= (length(elec) - extra)
+            idx_finish = length(elec)
+        end
+
+        % Constraints = [Constraints
+        %     var_sofc.sofc_operational_state(ii)*sofc_capacity*0.2 <= var_sofc.sofc_electricity(idx_start:idx_finish) <= var_sofc.sofc_operational_state(ii)*sofc_capacity];
+         Constraints = [Constraints
+            var_sofc.sofc_electricity(idx_start:idx_finish) <= var_sofc.sofc_operational_state(ii)*sofc_capacity];
+     Constraints = [Constraints
+            var_sofc.sofc_electricity <= var_sofc.adopted_sofc*sofc_capacity];
+     Constraints = [Constraints
+            var_sofc.sofc_electricity(ii) <= (var_sofc.sofc_electricity(ii - 1) + var_sofc.)];
+%     step = length(elec)/length(var_sofc.sofc_operational_state);
+%     for ii = 1:length(var_sofc.sofc_operational_state)
+%         idx_start = 1+(ii-1)*step;
+%         idx_finish = ii*step;
+% 
+%         Constraints = [Constraints
+%             var_sofc.sofc_electricity(idx_start:idx_finish) == var_sofc.sofc_operational_state(ii)*sofc_capacity];
+%Constraints = [Constraints, ...
+        %var_sofc.sofc_electricity == sofc_efficiency * var_h2es.h2es_dchrg];
+
+end
+
+% if sofc_on
+% Constraints = [Constraints
+% 0 <= var_sofc.adopted_sofc
+% 0 <= var_sofc.sofc_electricity];
+% % %%
+%         Constraints = [Constraints
+%             var_sofc.sofc_electricity == var_sofc.adopted_sofc.*sofc_capacity];
+% %     step = length(elec)/length(var_sofc.sofc_operational_state);
+% %     for ii = 1:length(var_sofc.sofc_operational_state)
+% %         idx_start = 1+(ii-1)*step;
+% %         idx_finish = ii*step;
+% % 
+% %         Constraints = [Constraints
+% %             var_sofc.sofc_electricity(idx_start:idx_finish) == var_sofc.sofc_operational_state(ii)*sofc_capacity];
+% 
+% end
+%%
+% 
+% %var_sofc.sofc_electricity <= var_sofc.sofc_operational_state*sofc_capacity];
+% %%%%Plug into opt_gen_equalities
+% Constraints = [Constraints
+% generation + var_sofc.sofc_electricity == loads]
+% %for (ii = 1:max(month(time)))
+% %idx = find(month(time) == ii);
+% for ii = 1:12 % Assuming data spans a full year
+%     idx = month(time) == ii;
+%     monthly_data = elec(idx);
+%     % Process monthly_data here
+% Constraints = [Constraints
+% sofc_electricity(idx) <= sofc_operational_state(ii)*fuel_capacity]
+% end
+
+ end
