@@ -57,6 +57,8 @@ if (site_location == 0)
     wind = xlsread(filename, 'D6:D8766');  % Adjust range if needed
 end
 
+if is_nal_running_the_model
+
 if (site_location == 1)
     filename = 'Africa resource data.xlsx';
     solar = xlsread(filename, 'Bangui,Central African Republic', 'C5:C8765'); 
@@ -82,8 +84,36 @@ if (site_location == 5)
     solar = xlsread(filename, 'Niamey, Niger', 'C5:C8765'); 
     wind  = xlsread(filename, 'Niamey, Niger', 'D5:D8765'); 
 end
+else
+
+if (site_location == 1)
+    filename = 'H:\_Tools_\DERopt\Data\NAL_Data_Center\Africa resource data.xlsx';
+    solar = xlsread(filename, 'Bangui,Central African Republic', 'C5:C8765'); 
+    wind  = xlsread(filename, 'Bangui,Central African Republic', 'D5:D8765'); 
+end
+if (site_location == 2)
+    filename = 'H:\_Tools_\DERopt\Data\NAL_Data_Center\Africa resource data.xlsx';
+    solar = xlsread(filename, 'Djibouti City, Djibouti', 'C5:C8765'); 
+    wind  = xlsread(filename, 'Djibouti City, Djibouti', 'D5:D8765'); 
+end
+if (site_location == 3)
+    filename = 'H:\_Tools_\DERopt\Data\NAL_Data_Center\Africa resource data.xlsx';
+    solar = xlsread(filename, 'Juba, South Sudan', 'C5:C8765'); 
+    wind  = xlsread(filename, 'Juba, South Sudan', 'D5:D8765'); 
+end
+if (site_location == 4)
+    filename = 'H:\_Tools_\DERopt\Data\NAL_Data_Center\Africa resource data.xlsx';
+    solar = xlsread(filename, 'N''Djamena, Chad', 'C5:C8765'); 
+    wind  = xlsread(filename, 'N''Djamena, Chad', 'D5:D8765'); 
+end
+if (site_location == 5)
+    filename = 'H:\_Tools_\DERopt\Data\NAL_Data_Center\Africa resource data.xlsx';
+    solar = xlsread(filename, 'Niamey, Niger', 'C5:C8765'); 
+    wind  = xlsread(filename, 'Niamey, Niger', 'D5:D8765'); 
+end
+end
 %% Loading River Data
-river_power_potential = readtable('Iguigig_River_Power.xlsx','Sheet','Real_Hour');
+% river_power_potential = readtable('Iguigig_River_Power.xlsx','Sheet','Real_Hour');
 % river_power_potential = readtable('Iguigig_River_Power.xlsx','Sheet','Eff_plus_1_hour');
 % river_power_potential = readtable('Iguigig_River_Power.xlsx','Sheet','Eff_plus_25_hour');
 % river_power_potential = readtable('Iguigig_River_Power.xlsx','Sheet','Site1_Speed_Delta');
@@ -92,7 +122,7 @@ river_power_potential = readtable('Iguigig_River_Power.xlsx','Sheet','Real_Hour'
 % river_power_potential = [repmat(river_power_potential.Site1_Power_kW,1,5)];
 % river_power_potential = river_power_potential(:,1);f
 %% Finding the value of the RivGen system!!!
-river_power_potential = [river_power_potential.Normalized_Site1_Power river_power_potential.Normalized_Site2_Power];
+% river_power_potential = [river_power_potential.Normalized_Site1_Power river_power_potential.Normalized_Site2_Power];
 % river_power_potential = table2array(river_power_potential(:,30+outer_loop));
 % river_power_potential(:,2) = [river_power_potential.Properties.VariableNames{24}];
 % river_power_potential = [river_power_potential.Site1_Power_kW river_power_potential.Site2_Power_kW];

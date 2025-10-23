@@ -1,6 +1,8 @@
 %% Playground file for OVMG Project
 clear all; close all; clc ; started_at = datetime('now'); startsim = tic;
 
+is_nal_running_the_model = 1;
+
 %% Parameters
 
 %%% opt.m parameters
@@ -65,27 +67,45 @@ toolittle_storage = 0; %%%Forces EES adoption - 13.5 kWh
 socc = 0; % SOC constraint: for each individual ees and rees, final SOC >= Initial SOC
 
 %% Adding paths
-%%%YALMIP Master Path
-addpath(genpath('C:\Users\overh\Downloads\YALMIP-master')) %rjf path
 
-%%%CPLEX Path
-% addpath(genpath('C:\Program Files\IBM\ILOG\CPLEX_Studio128\cplex\matlab\x64_win64')) %rjf path
-% addpath(genpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1263\cplex\matlab\x64_win64')) %cyc path
+if is_nal_running_the_model
+    %%%YALMIP Master Path
+    addpath(genpath('C:\Users\overh\Downloads\YALMIP-master')) %rjf path
 
-%%%DERopt paths
-addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy'))
-addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\DERopt-master\Design'))
-addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\DERopt-master\Input_Data'))
-addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\DERopt-master\Load_Processing'))
-addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\DERopt-master\Post_Processing'))
-addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\DERopt-master\Problem_Formulation_Single_Node'))
-addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\DERopt-master\Techno_Economic'))
-addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\DERopt-master\Utilities'))
-addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\DERopt-master\Data'))
+    %%%DERopt paths
+    addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy'))
+    addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\DERopt-master\Design'))
+    addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\DERopt-master\Input_Data'))
+    addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\DERopt-master\Load_Processing'))
+    addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\DERopt-master\Post_Processing'))
+    addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\DERopt-master\Problem_Formulation_Single_Node'))
+    addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\DERopt-master\Techno_Economic'))
+    addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\DERopt-master\Utilities'))
+    addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\DERopt-master\Data'))
+
+else
+    addpath(genpath('H:\_Tools_\Nathan\DeroptDataCenter2\Design'))
+    addpath(genpath('H:\_Tools_\Nathan\DeroptDataCenter2\Input_Data'))
+    addpath(genpath('H:\_Tools_\Nathan\DeroptDataCenter2\Load_Processing'))
+    addpath(genpath('H:\_Tools_\Nathan\DeroptDataCenter2\Post_Processing'))
+    addpath(('H:\_Tools_\Nathan\DeroptDataCenter2\Problem_Formulation_Single_Node'))
+    addpath(genpath('H:\_Tools_\Nathan\DeroptDataCenter2\Techno_Economic'))
+    addpath(genpath('H:\_Tools_\Nathan\DeroptDataCenter2\Utilities'))
+    addpath(genpath('H:\_Tools_\DERopt\Data\Data'))
+    addpath(genpath('H:\Matlab_Paths\YALMIP-master'))
+end
+
 
 %% Loading building demand
+if is_nal_running_the_model
 %%%Loading Data
 dt = readtable("C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\Asghari DataCenter Load Profile.xlsx");
+else
+dt = readtable("H:\_Tools_\DERopt\Data\NAL_Data_Center\Asghari DataCenter Load Profile.xlsx");
+
+end
+
+
 
 %time = datenum(dt.Date);
 %elec = dt.ElectricDemand_kW_;
