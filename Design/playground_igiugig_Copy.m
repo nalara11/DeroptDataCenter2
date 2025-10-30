@@ -88,10 +88,10 @@ addpath(genpath('C:\Users\overh\Downloads\DERopt-master-DataCenter - Copy\DERopt
 
 %%Choose Site Location 
 %site_location = 0; %EAF Renewables data
-site_location = 1; %Bangui, CAR
+%site_location = 1; %Bangui, CAR
 %site_location = 2; %Djibouti City, Djibouti
 %site_location = 3; %Juba, South Sudan
-%site_location = 4; %N'Djamena, Chad
+site_location = 4; %N'Djamena, Chad
 %site_location = 5; %Niamey, Niger
 
 %%%Loading Data
@@ -107,6 +107,10 @@ else
     if(site_location == 1 | site_location == 3)
         filename = 'CAR and SS load profile 1.xlsx';
         elec = xlsread(filename, 'Workable Data', 'E2:E8762'); 
+    end
+    if(site_location == 4 | site_location == 5)
+        filename = 'Chad and Niger Load profile 1.xlsx';
+        elec = xlsread(filename, 'Workable Data', 'E2:E8762');
     end
 end
 heat = [];
